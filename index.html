@@ -1,90 +1,21 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rozpočet domácnosti</title>
-<style>
-*{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#eef3f9;margin:0;padding:16px;color:#172338}
-main{max-width:550px;margin:auto}
-h1{text-align:center;font-size:26px}
-.card{background:white;padding:20px;margin:16px 0;border-radius:16px;box-shadow:0 3px 12px #0001}
-.balance{background:#164b83;color:white;text-align:center}
-.balance strong{font-size:32px}
-input,select,button{width:100%;padding:13px;margin:7px 0;border-radius:9px;border:1px solid #ccc;font-size:16px}
-button{background:#1676d2;color:white;border:0;font-weight:bold}
-.income{color:#16803d}
-.expense{color:#c42b37}
-li{padding:12px 0;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;gap:10px}
-li button{width:auto;background:#c42b37;padding:7px}
-</style>
-</head>
-<body>
-<main>
-<h1>🏠 Rozpočet domácnosti</h1>
-<div class="card balance">
-<p>Aktuální zůstatek</p>
-<strong id="balance">0 Kč</strong>
-</div>
-<div class="card">
-<p>Příjmy: <b class="income" id="income">0 Kč</b></p>
-<p>Výdaje: <b class="expense" id="expense">0 Kč</b></p>
-</div>
-<div class="card">
-<h2>➕ Nový záznam</h2>
-<form id="form">
-<input id="name" placeholder="Název položky" required>
-<input id="amount" type="number" min="0.01" step="0.01" placeholder="Částka v Kč" required>
-<select id="type">
-<option value="income">Příjem</option>
-<option value="expense">Výdaj</option>
-</select>
-<button type="submit">Uložit</button>
-</form>
-</div>
-<div class="card">
-<h2>📋 Historie</h2>
-<ul id="history" style="list-style:none;padding:0"></ul>
-</div>
-</main>
-<script>
-const key="rozpocet-domacnosti-v1";
-let records=[];
-try{const data=JSON.parse(localStorage.getItem(key)||"[]");if(Array.isArray(data))records=data}catch(e){}
-const money=n=>new Intl.NumberFormat("cs-CZ",{style:"currency",currency:"CZK"}).format(n);
-function render(){
-let income=0,expense=0;
-records.forEach(r=>{if(r.type==="income")income+=r.amount;else expense+=r.amount});
-document.getElementById("income").textContent=money(income);
-document.getElementById("expense").textContent=money(expense);
-document.getElementById("balance").textContent=money(income-expense);
-const list=document.getElementById("history");
-list.replaceChildren();
-records.slice().reverse().forEach(r=>{
-const li=document.createElement("li");
-const info=document.createElement("span");
-info.textContent=r.name+" – "+money(r.amount);
-info.className=r.type==="income"?"income":"expense";
-const btn=document.createElement("button");
-btn.textContent="Smazat";
-btn.onclick=()=>{records=records.filter(x=>x.id!==r.id);save()};
-li.append(info,btn);
-list.append(li);
-});
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#126b5d"><title>Domácí rozpočet</title><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-192.png" type="image/png"><link rel="apple-touch-icon" href="./icon-192.png"><style>body{font-family:system-ui,sans-serif;background:#f4f7f6;color:#17342f;margin:0}main{max-width:600px;margin:auto;padding:18px}h1{font-size:25px}.card{background:white;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 2px 10px #17342f10}.total{font-size:30px;font-weight:750}label{display:block;margin:12px 0 5px}input,select,button{box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd9d4;border-radius:10px;font:inherit}button{background:#126b5d;color:white;border:0;font-weight:650;margin-top:14px}button.secondary{background:#e6efeb;color:#17342f}button.delete{width:auto;margin:0;background:#fff0ed;color:#9a3022;padding:7px 10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.muted{color:#61746f;font-size:13px}.entry{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #eee}.entry div{min-width:0}.positive{color:#087b50}.negative{color:#a5372b}small{display:block;color:#61746f}#notice{color:#9a3022} .chart-legend{display:grid;gap:9px}.legend-row{display:flex;align-items:center;gap:8px;font-size:14px}.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}.legend-row strong{margin-left:auto}.donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.donut{width:165px;height:165px;flex-shrink:0}.chart-legend{flex:1;min-width:150px}.bar-row{margin:13px 0}.bar-title{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}.track{height:12px;border-radius:20px;background:#edf2f0;overflow:hidden}.fill{height:100%;border-radius:20px;background:#148978}.trend{display:flex;align-items:end;gap:8px;height:155px;border-bottom:1px solid #dae5df;padding-top:15px}.trend-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;height:100%;gap:5px}.trend-bars{display:flex;align-items:end;gap:3px;height:110px;width:100%;justify-content:center}.trend-bars span{width:40%;min-height:2px;border-radius:5px 5px 0 0}.trend-col small{font-size:11px}.chart-sub{font-size:13px;color:#61746f;margin-top:3px}.pill{display:inline-block;background:#e5f4ed;color:#087b50;padding:5px 9px;border-radius:100px;font-size:12px;font-weight:650}.empty{padding:16px 0;color:#61746f;font-size:14px} </style></head><body><main><h1>🏠 Domácí rozpočet</h1><p class="muted">Příjmy, výdaje a grafy · osobní offline rozpočet</p><div class="card"><label for="month">Měsíc</label><input type="month" id="month"><p class="muted">Zbývá vám</p><div class="total" id="balance">0 Kč</div><div class="grid"><p>📥 Příjmy<br><strong id="income">0 Kč</strong></p><p>📤 Výdaje<br><strong id="expense">0 Kč</strong></p></div></div><div class="card"><h2>📊 Přehled na první pohled</h2><div id="status" class="pill"></div><p class="chart-sub">Příjmy vs. výdaje za vybraný měsíc</p><div id="compare"></div><h3>Kam mizí peníze</h3><div class="donut-wrap"><svg id="donut" class="donut" viewBox="0 0 120 120" role="img" aria-label="Rozdělení výdajů podle kategorií"></svg><div id="legend" class="chart-legend"></div></div><h3>Vývoj za posledních 6 měsíců</h3><div class="trend" id="trend"></div><p class="chart-sub">Zelená = příjmy · oranžová = výdaje</p></div><div class="card"><h2>Přidat položku</h2><form id="form"><label for="type">Typ</label><select id="type"><option value="expense">Výdaj</option><option value="income">Příjem</option></select><label for="amount">Částka v Kč</label><input id="amount" type="number" min="0.01" step="0.01" required placeholder="Např. 1500"><label for="category">Kategorie</label><select id="category"></select><label for="description">Poznámka</label><input id="description" maxlength="120" placeholder="Např. týdenní nákup"><label for="date">Datum</label><input type="date" id="date" required><button>Uložit položku</button></form><p id="notice" role="alert"></p></div><div class="card"><h2>Historie</h2><div id="history"></div><button class="secondary" id="export" type="button">Exportovat zálohu (JSON)</button><label for="import">Obnovit ze zálohy</label><input type="file" id="import" accept="application/json,.json"><p class="muted">Záloha obsahuje vaše finanční údaje. Uchovávejte ji v soukromí.</p></div><p class="muted">⚠️ Data se ukládají jen na tomto zařízení. Pravidelně exportujte zálohu JSON, zejména před změnou telefonu nebo vymazáním dat aplikace.</p></main><script>
+const $=id=>document.getElementById(id), money=n=>new Intl.NumberFormat('cs-CZ',{style:'currency',currency:'CZK'}).format(n), key='domaci-rozpocet-v1';
+let entries=[];try{const v=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(v))entries=v}catch{}
+const cats={expense:['Potraviny','Bydlení','Energie','Auto a doprava','Děti','Splátky','Zdraví','Drogerie','Zábava','Ostatní'],income:['Výplata','Podnikání','Příspěvky','Ostatní příjem']};
+const today=new Date(), localDay=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);$('date').value=localDay;$('month').value=localDay.slice(0,7);
+function updateCats(){const selected=$('category').value;$('category').replaceChildren(...cats[$('type').value].map(c=>new Option(c,c)));if(cats[$('type').value].includes(selected))$('category').value=selected}
+function save(){try{localStorage.setItem(key,JSON.stringify(entries));$('notice').textContent='';return true}catch{$('notice').textContent='Nepodařilo se uložit data. Exportujte zálohu.';return false}}
+const palette=['#148978','#f59e0b','#6366f1','#e879a0','#0ea5e9','#8b5cf6','#ef4444','#84cc16','#d97706','#64748b'];
+function chartRender(data,inc,exp){
+ const compare=$('compare');compare.replaceChildren();for(const [label,value,color] of [['Příjmy',inc,'#148978'],['Výdaje',exp,'#ed8b38']]){const row=document.createElement('div');row.className='bar-row';const heading=document.createElement('div');heading.className='bar-title';const a=document.createElement('span');a.textContent=label;const b=document.createElement('strong');b.textContent=money(value);heading.append(a,b);const track=document.createElement('div');track.className='track';const fill=document.createElement('div');fill.className='fill';fill.style.background=color;fill.style.width=(Math.max(inc,exp)?value/Math.max(inc,exp)*100:0)+'%';track.append(fill);row.append(heading,track);compare.append(row)}
+ const status=$('status');status.textContent=inc===0&&exp===0?'Zatím bez záznamů':inc>=exp?'V plusu '+money(inc-exp):'V mínusu '+money(exp-inc);status.style.background=inc<exp?'#fff0ed':'#e5f4ed';status.style.color=inc<exp?'#a5372b':'#087b50';
+ const sums={};for(const e of data)if(e.type==='expense')sums[e.category]=(sums[e.category]||0)+e.amount;const sorted=Object.entries(sums).sort((a,b)=>b[1]-a[1]);const svg=$('donut');svg.replaceChildren();const ns='http://www.w3.org/2000/svg';const base=document.createElementNS(ns,'circle');for(const [k,v] of Object.entries({cx:'60',cy:'60',r:'42',fill:'none',stroke:'#edf2f0','stroke-width':'19'}))base.setAttribute(k,v);svg.append(base);let offset=0;sorted.forEach(([name,value],i)=>{const c=document.createElementNS(ns,'circle');const length=value/exp*263.894;c.setAttribute('cx','60');c.setAttribute('cy','60');c.setAttribute('r','42');c.setAttribute('fill','none');c.setAttribute('stroke',palette[i%palette.length]);c.setAttribute('stroke-width','19');c.setAttribute('stroke-dasharray',`${length} ${263.894-length}`);c.setAttribute('stroke-dashoffset',String(-offset));c.setAttribute('transform','rotate(-90 60 60)');svg.append(c);offset+=length});const middle=document.createElementNS(ns,'text');middle.setAttribute('x','60');middle.setAttribute('y','57');middle.setAttribute('text-anchor','middle');middle.setAttribute('font-size','11');middle.setAttribute('fill','#61746f');middle.textContent='Výdaje';svg.append(middle);const total=document.createElementNS(ns,'text');total.setAttribute('x','60');total.setAttribute('y','72');total.setAttribute('text-anchor','middle');total.setAttribute('font-size','12');total.setAttribute('font-weight','bold');total.setAttribute('fill','#17342f');total.textContent=Math.round(exp).toLocaleString('cs-CZ')+' Kč';svg.append(total);const legend=$('legend');legend.replaceChildren();if(!sorted.length){const p=document.createElement('p');p.className='empty';p.textContent='Přidej výdaj a uvidíš rozdělení podle kategorií.';legend.append(p)}else sorted.forEach(([name,value],i)=>{const row=document.createElement('div');row.className='legend-row';const dot=document.createElement('span');dot.className='dot';dot.style.background=palette[i%palette.length];const label=document.createElement('span');label.textContent=name;const amount=document.createElement('strong');amount.textContent=Math.round(value/exp*100)+' %';row.append(dot,label,amount);legend.append(row)});
+ const [y,m]=$('month').value.split('-').map(Number);const months=Array.from({length:6},(_,i)=>{const d=new Date(y,m-6+i,1);const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');const items=entries.filter(e=>e.date.slice(0,7)===key);return {name:new Intl.DateTimeFormat('cs-CZ',{month:'short'}).format(d),inc:items.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0),exp:items.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0)}});const max=Math.max(1,...months.flatMap(x=>[x.inc,x.exp]));const trend=$('trend');trend.replaceChildren();for(const x of months){const col=document.createElement('div');col.className='trend-col';const bars=document.createElement('div');bars.className='trend-bars';for(const [v,color] of [[x.inc,'#148978'],[x.exp,'#ed8b38']]){const bar=document.createElement('span');bar.style.height=(v/max*100)+'%';bar.style.background=color;bar.title=money(v);bars.append(bar)}const label=document.createElement('small');label.textContent=x.name;col.append(bars,label);trend.append(col)}
 }
-function save(){localStorage.setItem(key,JSON.stringify(records));render()}
-document.getElementById("form").onsubmit=e=>{
-e.preventDefault();
-const name=document.getElementById("name").value.trim();
-const amount=Number(document.getElementById("amount").value);
-const type=document.getElementById("type").value;
-if(!name||!Number.isFinite(amount)||amount<=0)return;
-records.push({id:crypto.randomUUID(),name,amount,type});
-save();
-e.target.reset();
-};
-render();
-</script>
-</body>
-</html>
+function render(){const data=entries.filter(e=>e.date.slice(0,7)===$('month').value).sort((a,b)=>b.date.localeCompare(a.date));const inc=data.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0),exp=data.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);$('income').textContent=money(inc);$('expense').textContent=money(exp);$('balance').textContent=money(inc-exp);$('balance').className='total '+(inc-exp<0?'negative':'positive');chartRender(data,inc,exp);$('history').replaceChildren();if(!data.length){$('history').textContent='Zatím žádné položky.';return}for(const e of data){const row=document.createElement('div');row.className='entry';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=e.category+' · '+money(e.amount);title.className=e.type==='income'?'positive':'negative';const details=document.createElement('small');details.textContent=e.date+(e.description?' · '+e.description:'');info.append(title,details);const del=document.createElement('button');del.className='delete';del.textContent='Smazat';del.setAttribute('aria-label','Smazat položku '+e.category);del.onclick=()=>{if(confirm('Opravdu smazat položku?')){entries=entries.filter(x=>x.id!==e.id);save();render()}};row.append(info,del);$('history').append(row)}}
+$('type').onchange=updateCats;$('month').onchange=render;updateCats();render();
+$('form').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value);if(!Number.isFinite(amount)||amount<=0||amount>1e10){$('notice').textContent='Zadejte platnou kladnou částku.';return}const date=$('date').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;entries.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),type:$('type').value,amount:Math.round(amount*100)/100,category:$('category').value,description:$('description').value.trim(),date});save();$('month').value=date.slice(0,7);$('amount').value='';$('description').value='';render()};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,entries},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='domaci-rozpocet-zaloha.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('import').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>5e6)throw Error('Soubor je příliš velký');const data=JSON.parse(await f.text());if(data.version!==1||!Array.isArray(data.entries)||data.entries.length>20000||!data.entries.every(x=>typeof x.id==='string'&&['income','expense'].includes(x.type)&&typeof x.amount==='number'&&Number.isFinite(x.amount)&&x.amount>0&&x.amount<=1e10&&typeof x.category==='string'&&x.category.length<100&&typeof x.description==='string'&&x.description.length<=120&&typeof x.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)))throw Error('Neplatný formát zálohy');if(confirm('Nahradit všechny současné položky daty ze zálohy?')){entries=data.entries;save();render()}}catch(err){$('notice').textContent='Zálohu nelze načíst: '+err.message}finally{e.target.value=''}};
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){navigator.serviceWorker.register("./sw.js").catch(()=>{});}
+</script></body></html>
